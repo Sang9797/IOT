@@ -1,0 +1,68 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: device-management
+          uri: lb://device-management-service
+          predicates:
+            - Path=/api/devices/**
+          filters:
+            - StripPrefix=2
+            - name: AuthenticationFilter
+        - id: device-processor
+          uri: lb://device-processor-service
+          predicates:
+            - Path=/api/processor/**
+          filters:
+            - StripPrefix=2
+            - name: AuthenticationFilter
+        - id: analysis-report
+          uri: lb://analysis-report-service
+          predicates:
+            - Path=/api/analysis/**
+          filters:
+            - StripPrefix=2
+            - name: AuthenticationFilter
+        - id: notification
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=2
+            - name: AuthenticationFilter
+        - id: websocket
+          uri: lb://notification-service
+          predicates:
+            - Path=/ws/**
+          filters:
+            - StripPrefix=1
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+jwt:
+  secret: mySecretKeyForJWTTokenGeneration123456789
+  expiration: 86400000 # 24 hours
+
+logging:
+  level:
+    com.iot.apigateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG

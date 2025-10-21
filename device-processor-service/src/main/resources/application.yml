@@ -1,0 +1,56 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: device-processor-service
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+    consumer:
+      group-id: device-processor-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+# MQTT Configuration
+mqtt:
+  broker:
+    url: tcp://localhost:1883
+  client:
+    id: device-processor
+  username: 
+  password: 
+
+# InfluxDB Configuration
+influxdb:
+  url: http://localhost:8086
+  token: my-token
+  org: iot-org
+  bucket: iot-data
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.iot.deviceprocessor: DEBUG
+    org.springframework.kafka: INFO
+    org.eclipse.paho: INFO
