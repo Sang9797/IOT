@@ -2,6 +2,8 @@
 
 A comprehensive IoT system designed to collect data from factory machines, provide real-time insights, send alerts, and allow control commands to devices. Built with Spring Boot 3, Java JDK 25, and microservices architecture.
 
+![Alt Text](systemdesign.jpg "IOT System Design")
+
 ## 🏗️ System Architecture
 
 The system follows a microservices architecture with the following components:
