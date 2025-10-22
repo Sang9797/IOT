@@ -40,6 +40,7 @@ The system follows a microservices architecture with the following components:
 - Java JDK 25
 - Maven 3.8+
 - Docker and Docker Compose
+- Node.js 18+ (for frontend and mock devices)
 - Git
 
 ### 1. Clone the Repository
@@ -63,13 +64,37 @@ docker-compose up -d eureka-server zookeeper kafka mosquitto postgres influxdb r
 docker-compose up -d
 ```
 
-### 5. Verify Services
-- API Gateway: http://localhost:8080
-- Eureka Dashboard: http://localhost:8761
-- InfluxDB UI: http://localhost:8086
-- Kafka UI: http://localhost:9092
+### 5. Setup and Start Frontend
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Setup frontend (install dependencies, create .env)
+./scripts/setup.sh
+
+# Start development server
+npm start
+```
+
+### 6. Verify Services
+- **Frontend Dashboard**: http://localhost:3000
+- **API Gateway**: http://localhost:8080
+- **Eureka Dashboard**: http://localhost:8761
+- **InfluxDB UI**: http://localhost:8086
+- **Kafka UI**: http://localhost:9092
 
 ## 🏢 Services Overview
+
+### Frontend Dashboard (Port 3000)
+- **Technology**: React.js with modern UI/UX
+- **Features**:
+  - Real-time monitoring dashboard with WebSocket integration
+  - Device management with CRUD operations
+  - Control commands interface for device control
+  - Alerts dashboard with real-time notifications
+  - Analytics and reporting with interactive charts
+  - User management with role-based access control
+- **Integration**: Connects to all backend services via API Gateway
 
 ### API Gateway (Port 8080)
 - **Purpose**: Central entry point for all client requests
