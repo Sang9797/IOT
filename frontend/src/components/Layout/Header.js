@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, Bell, Search, User, Settings, LogOut } from 'lucide-react';
-import { useAuthStore } from '../../store/authStore';
+import useAuthStore from '../../store/authStore';
 import webSocketService from '../../services/websocket';
 
 const Header = ({ onToggleSidebar }) => {

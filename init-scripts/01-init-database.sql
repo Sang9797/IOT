@@ -1,7 +1,7 @@
 -- Initialize IoT Devices Database
 
 -- Create database if not exists
-CREATE DATABASE IF NOT EXISTS iot_devices;
+CREATE DATABASE iot_devices;
 
 -- Use the database
 \c iot_devices;

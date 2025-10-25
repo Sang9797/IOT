@@ -1,9 +1,9 @@
 server:
-  port: 9081
+  port: 9085
 
 spring:
   application:
-    name: device-management-service
+    name: user-service
   datasource:
     url: jdbc:postgresql://localhost:5432/iot_devices
     username: iot_user

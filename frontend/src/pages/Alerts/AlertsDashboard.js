@@ -12,7 +12,7 @@ import {
   RefreshCw,
   Download
 } from 'lucide-react';
-import { useDeviceStore } from '../../store/deviceStore';
+import useDeviceStore from '../../store/deviceStore';
 import webSocketService from '../../services/websocket';
 import { toast } from 'react-hot-toast';
 

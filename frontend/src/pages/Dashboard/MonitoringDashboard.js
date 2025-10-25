@@ -10,10 +10,11 @@ import {
   Signal,
   AlertTriangle,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Cpu
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { useDeviceStore } from '../../store/deviceStore';
+import useDeviceStore from '../../store/deviceStore';
 import webSocketService from '../../services/websocket';
 
 const MonitoringDashboard = () => {

@@ -26,7 +26,7 @@ import {
   Area
 } from 'recharts';
 import { analysisAPI } from '../../services/api';
-import { useDeviceStore } from '../../store/deviceStore';
+import useDeviceStore from '../../store/deviceStore';
 import { toast } from 'react-hot-toast';
 
 const Analytics = () => {

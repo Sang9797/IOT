@@ -12,7 +12,7 @@ import {
   Download,
   Upload
 } from 'lucide-react';
-import { useDeviceStore } from '../../store/deviceStore';
+import useDeviceStore from '../../store/deviceStore';
 import DeviceForm from '../../components/Devices/DeviceForm';
 import DeviceDetails from '../../components/Devices/DeviceDetails';
 

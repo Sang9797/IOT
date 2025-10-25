@@ -12,7 +12,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
-import { useAuthStore } from '../../store/authStore';
+import  useAuthStore from '../../store/authStore';
 
 const Sidebar = ({ isOpen, onToggle }) => {
   const location = useLocation();

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Service Discovery
   eureka-server:
-    image: steeltoeoss/eureka-server:3.1.0
+    image: steeltoeoss/eureka-server:4.1.0
     container_name: eureka-server
     ports:
       - "8761:8761"

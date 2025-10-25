@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9080
 
 spring:
   application:
@@ -32,16 +32,21 @@ spring:
           uri: lb://notification-service
           predicates:
             - Path=/api/notifications/**
-          filters:
-            - StripPrefix=2
-            - name: AuthenticationFilter
+        - id: auth-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**
         - id: websocket
           uri: lb://notification-service
           predicates:
             - Path=/ws/**
           filters:
             - StripPrefix=1
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:9081}
 eureka:
   client:
     service-url:

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, Activity, AlertCircle } from 'lucide-react';
-import { useAuthStore } from '../../store/authStore';
+import useAuthStore from '../../store/authStore';
 
 const Login = () => {
   const { login, isLoading, error } = useAuthStore();

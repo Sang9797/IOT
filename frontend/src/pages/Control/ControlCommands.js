@@ -15,7 +15,7 @@ import {
   Search,
   Filter
 } from 'lucide-react';
-import { useDeviceStore } from '../../store/deviceStore';
+import useDeviceStore from '../../store/deviceStore';
 import { controlAPI } from '../../services/api';
 import { toast } from 'react-hot-toast';
 
