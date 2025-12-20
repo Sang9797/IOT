@@ -139,6 +139,7 @@ docker-compose.local.yml
 application-secret.yml
 application-secret.properties
 config/secrets/
+mosquitto/config/passwd
 
 # ===========================================
 # Logs

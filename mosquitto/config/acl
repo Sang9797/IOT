@@ -1,0 +1,29 @@
+# =========================
+# ACL Configuration
+# =========================
+
+# Admin user - full access
+user admin_user
+topic readwrite #
+
+# Healthcheck user
+user healthcheck
+topic read health/ping
+
+# IoT devices
+user iot_device_01
+topic write iot/sensors/device-01/#
+topic read iot/commands/device-01/#
+
+user iot_device_02
+topic write iot/sensors/device-02/#
+topic read iot/commands/device-02/#
+
+# Kafka bridge
+user kafka_bridge
+topic read iot/sensors/#
+topic read iot/+/#
+
+# Dynamic pattern users
+pattern write iot/sensors/%u/#
+pattern read iot/commands/%u/#
