@@ -50,7 +50,7 @@ services:
         [
           "CMD-SHELL",
           "mosquitto_sub -h localhost -p 8883 \
-           --cafile /mosquitto/certs/ca.crt \
+           --cafile /mosquitto/certs/ca-bundle.crt \
            --cert /mosquitto/certs/healthcheck.crt \
            --key /mosquitto/certs/healthcheck.key \
            -t health/ping -C 1 -W 5 || exit 1"
@@ -99,6 +99,9 @@ services:
       start_period: 60s
     volumes:
       - ./kafka-connect/plugins:/usr/share/confluent-hub-components
+      # Add certificates
+      - ./kafka-connect/keystore.jks:/certs/keystore.jks:ro
+      - ./kafka-connect/truststore.jks:/certs/truststore.jks:ro
     networks:
       - iot-network
 

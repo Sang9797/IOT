@@ -141,6 +141,7 @@ application-secret.properties
 config/secrets/
 mosquitto/config/passwd
 mosquitto/certs/*
+mosquitto/config-extend/cert/*
 
 # ===========================================
 # Logs
