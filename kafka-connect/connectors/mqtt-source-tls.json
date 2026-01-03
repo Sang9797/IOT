@@ -1,0 +1,19 @@
+{
+  "name": "mqtt-source-tls",
+  "config": {
+    "connector.class": "io.confluent.connect.mqtt.MqttSourceConnector",
+    "tasks.max": "1",
+    "mqtt.server.uri": "ssl://mosquitto:8883",
+    "mqtt.topics": "iot/sensors/#",
+    "kafka.topic": "mqtt-messages",
+    "mqtt.qos": "1",
+    "mqtt.clean.session.enabled": "true",
+    "mqtt.ssl.trust.store.path": "/certs/truststore.jks",
+    "mqtt.ssl.trust.store.password": "kafka1234",
+    "mqtt.ssl.key.store.path": "/certs/keystore.jks",
+    "mqtt.ssl.key.store.password": "kafka1234",
+    "mqtt.ssl.key.password": "kafka1234",
+    "confluent.topic.bootstrap.servers": "kafka:29092",
+    "confluent.topic.replication.factor": "1"
+  }
+}

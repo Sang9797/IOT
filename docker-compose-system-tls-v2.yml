@@ -22,8 +22,15 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      # Important: Define where Kafka stores data
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      # Retention settings (optional - adjust based on your needs)
+      KAFKA_LOG_RETENTION_HOURS: 168  # 7 days
+      KAFKA_LOG_RETENTION_BYTES: 1073741824  # 1GB per partition
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824  # 1GB
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - ./kafka/data:/var/lib/kafka/data
     healthcheck:
       test: kafka-broker-api-versions --bootstrap-server localhost:9092
       interval: 10s
@@ -104,6 +111,21 @@ services:
       - ./kafka-connect/truststore.jks:/certs/truststore.jks:ro
     networks:
       - iot-network
+
+  # Connector Auto-Deploy Service
+  connector-setup:
+    image: badouralix/curl-jq:latest  # ← Change this line
+    container_name: connector-setup
+    depends_on:
+      mqtt-kafka-bridge:
+        condition: service_healthy
+    volumes:
+      - ./kafka-connect/connectors:/connectors:ro
+      - ./kafka-connect/scripts:/scripts:ro
+    command: /scripts/deploy-connectors.sh
+    networks:
+      - iot-network
+    restart: "no"
 
 networks:
   iot-network:

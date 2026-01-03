@@ -244,6 +244,9 @@ grafana_data/
 elasticsearch_data/
 logstash_data/
 
+# Kafk data
+kafka/data/
+
 # ===========================================
 # Backup Files
 # ===========================================
