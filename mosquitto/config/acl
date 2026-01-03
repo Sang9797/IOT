@@ -15,6 +15,11 @@ user kafka_bridge
 topic read iot/sensors/#
 topic read iot/+/#
 
+# Processor client
+user processor-client
+topic read iot/sensors/#
+topic write iot/commands/#
+
 # Dynamic pattern users
 pattern write iot/sensors/%u/#
 pattern read iot/commands/%u/#

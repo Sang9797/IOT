@@ -5,41 +5,51 @@ spring:
   application:
     name: device-processor-service
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
       acks: all
       retries: 3
     consumer:
       group-id: device-processor-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVER_URL}
   instance:
     prefer-ip-address: true
 
 # MQTT Configuration
 mqtt:
   broker:
-    url: tcp://localhost:1883
+    url: ${MQTT_BROKER_URL}
   client:
     id: device-processor
-  username: 
-  password: 
+  ssl:
+    enabled: true
+    truststore:
+      path: classpath:certs/truststore.jks
+      password: ${MQTT_STORE_PASS}
+      type: JKS
+    keystore:
+      path: classpath:certs/keystore.jks
+      password: ${MQTT_STORE_PASS}
+      type: JKS
+    protocol: TLSv1.2
 
 # InfluxDB Configuration
 influxdb:
-  url: http://localhost:8086
-  token: my-token
-  org: iot-org
-  bucket: iot-data
+  url: ${INFLUXDB_URL}
+  token: ${INFLUXDB_TOKEN}
+  org: ${INFLUXDB_ORG}
+  bucket: ${INFLUXDB_BUCKET}
 
+#
 management:
   endpoints:
     web:
@@ -51,6 +61,6 @@ management:
 
 logging:
   level:
-    com.iot.deviceprocessor: DEBUG
+    com.iot.deviceprocessor: ${LOG_LEVEL}
     org.springframework.kafka: INFO
     org.eclipse.paho: INFO

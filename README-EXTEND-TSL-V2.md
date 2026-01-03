@@ -340,14 +340,6 @@ keytool -list -keystore kafka-connect/truststore.jks
 
 ### Convert PKCS12 to JKS keystore
 ```bash
-openssl pkcs12 -export \
-  -in mosquitto/config-extend/cert/kafka_bridge.crt \
-  -inkey mosquitto/config-extend/cert/kafka_bridge.key \
-  -out kafka-connect/kafka_bridge.p12 \
-  -name kafka_bridge \
-  -passout pass:kafka1234  
-```
-```bash
 keytool -importkeystore \
   -srckeystore kafka-connect/kafka_bridge.p12 \
   -srcstoretype PKCS12 \
@@ -391,12 +383,40 @@ curl -X POST http://localhost:8083/connectors \
     "confluent.topic.replication.factor": "1"
   }
 }'
+```
+
+### Update connector
+```bash
+curl -X PUT http://localhost:8083/connectors/mqtt-source-tls/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "connector.class": "io.confluent.connect.mqtt.MqttSourceConnector",
+    "tasks.max": "1",
+    "mqtt.server.uri": "ssl://mosquitto:8883",
+    "mqtt.topics": "iot/sensors/#",
+    "kafka.topic": "mqtt-messages",
+    "mqtt.qos": "1",
+    "mqtt.clean.session.enabled": "true",
+    "mqtt.ssl.trust.store.path": "/certs/truststore.jks",
+    "mqtt.ssl.trust.store.password": "kafka1234",
+    "mqtt.ssl.key.store.path": "/certs/keystore.jks",
+    "mqtt.ssl.key.store.password": "kafka1234",
+    "mqtt.ssl.key.password": "kafka1234",
+    "confluent.topic.bootstrap.servers": "kafka:29092",
+    "confluent.topic.replication.factor": "1",
+  }'
 
 ```
 
 ### Verify connector
 ```bash
 curl -X GET http://localhost:8083/connectors | jq
+```
+```bash
+curl http://localhost:8083/connectors/mqtt-source-tls/status | jq
+```
+```bash
+curl http://localhost:8083/connectors/mqtt-source-tls/config | jq
 ```
 
 # Verify flow MQTT -> MQTT_BRIDGE -> KAFKA

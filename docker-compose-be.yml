@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    depends_on:
+      - eureka-server
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    networks:
+      - iot-network
+
+  # Device Management Service
+  device-management-service:
+    build:
+      context: .
+      dockerfile: device-management-service/Dockerfile
+    container_name: device-management-service
+    depends_on:
+      - eureka-server
+      - postgres
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/iot_devices
+      - SPRING_DATASOURCE_USERNAME=iot_user
+      - SPRING_DATASOURCE_PASSWORD=iot_password
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    networks:
+      - iot-network
+
+  # Device Processor Service
+  device-processor-service:
+    build:
+      context: .
+      dockerfile: device-processor-service/Dockerfile
+    container_name: device-processor-service
+    depends_on:
+      - eureka-server
+      - kafka
+      - mosquitto
+      - influxdb
+    ports:
+      - "8082:8082"
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - MQTT_BROKER_URL=tcp://mosquitto:1883
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=my-token
+    networks:
+      - iot-network
+
+  # Analysis Report Service
+  analysis-report-service:
+    build:
+      context: .
+      dockerfile: analysis-report-service/Dockerfile
+    container_name: analysis-report-service
+    depends_on:
+      - eureka-server
+      - kafka
+      - influxdb
+    ports:
+      - "8083:8083"
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=my-token
+    networks:
+      - iot-network
+
+  # Notification Service
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: notification-service
+    depends_on:
+      - eureka-server
+      - kafka
+    ports:
+      - "8084:8084"
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    networks:
+      - iot-network
+
+networks:
+  iot-network:
+    driver: bridge
