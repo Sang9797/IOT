@@ -451,5 +451,49 @@ mosquitto_pub -h localhost -p 8883 -t "iot/sensors/iot_device_01/temp" \
           -m '{"temp":25.5}'  
 ```
 
+```bash
+mosquitto_pub -h localhost -p 8883 -t "iot/sensors/iot_device_01" \
+  --cafile /home/sanglee/cursor/IOT/mosquitto/config-extend/cert/ca-bundle.crt \
+  --cert /home/sanglee/cursor/IOT/mosquitto/config-extend/cert/iot_device_01.crt \
+  --key /home/sanglee/cursor/IOT/mosquitto/config-extend/cert/iot_device_01.key \
+  -m '{
+    "deviceId": "mock-device-001",
+    "timestamp": "2026-01-04T20:15:00",
+    "factoryId": "factory-001",
+    "location": "Production Line A - Device 1",
+    "messageType": "sensor_data",
+    "batteryLevel": 95.2,
+    "signalStrength": -45,
+    "data": {
+      "value": 25.5,
+      "unit": "°C",
+      "isAnomaly": false,
+      "anomalyCount": 3,
+      "temperature": 25.5,
+      "humidity": 45.2
+    }
+}'  
+```
+## Automation test
+```bash
+cd mock-iot-devices
+python3.8 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+### Run continuously - publishes ALL message types every 60 seconds
+```bash
+python3.8 device_mock.py
+```
+### Run continuously with custom interval - publishes ALL message types every 30 seconds
+```bash
+python3.8 device_mock.py --interval 30
+```
+
+### Publish ALL message types once and exit
+```bash
+python3.8 device_mock.py --once
+```
+
 
 
