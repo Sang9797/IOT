@@ -35,6 +35,7 @@ public class KafkaTopics {
     public static final String MQTT_BRIDGE_DATA = "mqtt.bridge.data";
     public static final String MQTT_BRIDGE_COMMANDS = "mqtt.bridge.commands";
     public static final String MQTT_INGRESS = "mqtt-messages";
+    public static final String MQTT_BROKER_UPDATES = "mqtt.broker.updates";
 
     private KafkaTopics() {
         // Utility class

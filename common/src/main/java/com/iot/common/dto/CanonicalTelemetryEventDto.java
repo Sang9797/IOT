@@ -17,6 +17,8 @@ public class CanonicalTelemetryEventDto {
 
     private String deviceId;
     private String factoryId;
+    private String mqttBrokerId;
+    private String sourceBridgeId;
     private String location;
     private String messageType;
 
@@ -48,6 +50,10 @@ public class CanonicalTelemetryEventDto {
     public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
     public String getFactoryId() { return factoryId; }
     public void setFactoryId(String factoryId) { this.factoryId = factoryId; }
+    public String getMqttBrokerId() { return mqttBrokerId; }
+    public void setMqttBrokerId(String mqttBrokerId) { this.mqttBrokerId = mqttBrokerId; }
+    public String getSourceBridgeId() { return sourceBridgeId; }
+    public void setSourceBridgeId(String sourceBridgeId) { this.sourceBridgeId = sourceBridgeId; }
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
     public String getMessageType() { return messageType; }

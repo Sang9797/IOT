@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820" role="img" aria-labelledby="title desc">
+  <title id="title">Multi-broker MQTT IoT architecture</title>
+  <desc id="desc">Architecture showing device management, broker assignment, multiple MQTT brokers, and processor routing via a broker connection manager.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f5f7fb; }
+      .panel { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 18; ry: 18; }
+      .accent { fill: #dbeafe; stroke: #2563eb; stroke-width: 2; rx: 14; ry: 14; }
+      .mqtt { fill: #dcfce7; stroke: #15803d; stroke-width: 2; rx: 14; ry: 14; }
+      .device { fill: #fef3c7; stroke: #b45309; stroke-width: 2; rx: 10; ry: 10; }
+      .text { fill: #111827; font-family: Arial, sans-serif; font-size: 20px; font-weight: 700; }
+      .sub { fill: #374151; font-family: Arial, sans-serif; font-size: 16px; }
+      .line { stroke: #475569; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .dashed { stroke-dasharray: 8 8; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L10,3 L0,6 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="1400" height="820"/>
+
+  <rect class="panel" x="60" y="70" width="300" height="250"/>
+  <text class="text" x="90" y="120">React Dashboard</text>
+  <text class="sub" x="90" y="160">Broker CRUD</text>
+  <text class="sub" x="90" y="190">Device broker assignment</text>
+  <text class="sub" x="90" y="220">Broker-aware control UI</text>
+
+  <rect class="panel" x="450" y="60" width="380" height="280"/>
+  <text class="text" x="480" y="110">device-management-service</text>
+  <text class="sub" x="480" y="150">devices.mqtt_broker_id FK</text>
+  <text class="sub" x="480" y="180">mqtt_brokers CRUD API</text>
+  <text class="sub" x="480" y="210">validation + broker/device events</text>
+
+  <rect class="accent" x="900" y="60" width="420" height="320"/>
+  <text class="text" x="930" y="110">device-processor-service</text>
+  <text class="sub" x="930" y="150">Broker connection manager</text>
+  <text class="sub" x="930" y="180">Device-to-broker registry</text>
+  <text class="sub" x="930" y="210">Per-broker publish + subscribe</text>
+  <text class="sub" x="930" y="240">Broadcast fan-out across enabled brokers</text>
+
+  <rect class="mqtt" x="900" y="450" width="130" height="120"/>
+  <text class="text" x="930" y="500">Broker A</text>
+  <text class="sub" x="930" y="530">topicPrefix: line-a</text>
+
+  <rect class="mqtt" x="1090" y="450" width="130" height="120"/>
+  <text class="text" x="1120" y="500">Broker B</text>
+  <text class="sub" x="1120" y="530">topicPrefix: line-b</text>
+
+  <rect class="mqtt" x="1280" y="450" width="130" height="120"/>
+  <text class="text" x="1310" y="500">Broker C</text>
+  <text class="sub" x="1310" y="530">topicPrefix: line-c</text>
+
+  <rect class="device" x="860" y="650" width="180" height="90"/>
+  <text class="text" x="890" y="700">Devices A*</text>
+  <text class="sub" x="890" y="728">assigned to Broker A</text>
+
+  <rect class="device" x="1050" y="650" width="180" height="90"/>
+  <text class="text" x="1080" y="700">Devices B*</text>
+  <text class="sub" x="1080" y="728">assigned to Broker B</text>
+
+  <rect class="device" x="1240" y="650" width="180" height="90"/>
+  <text class="text" x="1270" y="700">Devices C*</text>
+  <text class="sub" x="1270" y="728">assigned to Broker C</text>
+
+  <path class="line" d="M360 190 L450 190"/>
+  <path class="line" d="M830 200 L900 200"/>
+  <path class="line dashed" d="M1090 380 L1090 450"/>
+  <path class="line dashed" d="M965 380 L965 450"/>
+  <path class="line dashed" d="M1280 380 L1280 450"/>
+  <path class="line" d="M965 570 L950 650"/>
+  <path class="line" d="M1155 570 L1140 650"/>
+  <path class="line" d="M1345 570 L1330 650"/>
+
+  <text class="sub" x="520" y="375">Kafka: device.metadata.updates + mqtt.broker.updates</text>
+  <path class="line dashed" d="M640 340 L1120 340"/>
+</svg>

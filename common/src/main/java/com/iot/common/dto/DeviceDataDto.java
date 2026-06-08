@@ -20,6 +20,8 @@ public class DeviceDataDto {
     private Map<String, Object> data;
 
     private String factoryId;
+    private String mqttBrokerId;
+    private String sourceBridgeId;
     private String location;
     private String messageType;
     private Double batteryLevel;
@@ -43,6 +45,10 @@ public class DeviceDataDto {
     public void setData(Map<String, Object> data) { this.data = data; }
     public String getFactoryId() { return factoryId; }
     public void setFactoryId(String factoryId) { this.factoryId = factoryId; }
+    public String getMqttBrokerId() { return mqttBrokerId; }
+    public void setMqttBrokerId(String mqttBrokerId) { this.mqttBrokerId = mqttBrokerId; }
+    public String getSourceBridgeId() { return sourceBridgeId; }
+    public void setSourceBridgeId(String sourceBridgeId) { this.sourceBridgeId = sourceBridgeId; }
     public String getLocation() { return location; }
     public void setLocation(String location) { this.location = location; }
     public String getMessageType() { return messageType; }

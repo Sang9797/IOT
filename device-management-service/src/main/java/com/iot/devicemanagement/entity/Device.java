@@ -34,6 +34,10 @@ public class Device {
     private String factoryId;
     
     private String location;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mqtt_broker_id")
+    private MqttBroker mqttBroker;
     
     @ElementCollection
     @CollectionTable(name = "device_configurations", joinColumns = @JoinColumn(name = "device_id"))
@@ -119,6 +123,14 @@ public class Device {
         this.location = location;
     }
 
+    public MqttBroker getMqttBroker() {
+        return mqttBroker;
+    }
+
+    public void setMqttBroker(MqttBroker mqttBroker) {
+        this.mqttBroker = mqttBroker;
+    }
+
     public Map<String, String> getConfiguration() {
         return configuration;
     }
@@ -161,6 +173,14 @@ public class Device {
         dto.setStatus(this.status);
         dto.setFactoryId(this.factoryId);
         dto.setLocation(this.location);
+        if (this.configuration != null) {
+            dto.setConfiguration(Map.copyOf(this.configuration));
+        }
+        if (this.mqttBroker != null) {
+            dto.setMqttBrokerId(this.mqttBroker.getId());
+            dto.setMqttBrokerName(this.mqttBroker.getName());
+            dto.setMqttBrokerDisplayUrl(this.mqttBroker.toDto().getDisplayUrl());
+        }
         dto.setLastSeen(this.lastSeen);
         dto.setCreatedAt(this.createdAt);
         dto.setUpdatedAt(this.updatedAt);
@@ -175,6 +195,10 @@ public class Device {
         if (dto.getStatus() != null) this.status = dto.getStatus();
         if (dto.getFactoryId() != null) this.factoryId = dto.getFactoryId();
         if (dto.getLocation() != null) this.location = dto.getLocation();
+        if (dto.getConfiguration() != null) {
+            this.configuration = dto.getConfiguration().entrySet().stream()
+                    .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, entry -> String.valueOf(entry.getValue())));
+        }
         if (dto.getLastSeen() != null) this.lastSeen = dto.getLastSeen();
     }
 }

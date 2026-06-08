@@ -101,7 +101,8 @@ public class DeviceProcessorController {
         stats.put("service", "device-processor-service");
         stats.put("status", "running");
         stats.put("timestamp", java.time.LocalDateTime.now().toString());
-        stats.put("mqtt_connected", true); // This should be checked from MqttService
+        stats.put("mqtt_connected", mqttService.getConnectedBrokerCount() > 0);
+        stats.put("connected_broker_count", mqttService.getConnectedBrokerCount());
 
         return ResponseEntity.ok(stats);
     }

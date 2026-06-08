@@ -5,10 +5,11 @@ import com.iot.common.config.KafkaHeaderNames;
 import com.iot.common.dto.DeviceDto;
 import com.iot.common.dto.DeviceStatusEventDto;
 import com.iot.devicemanagement.entity.Device;
+import com.iot.devicemanagement.entity.MqttBroker;
+import com.iot.devicemanagement.exception.NotFoundException;
 import com.iot.devicemanagement.repository.DeviceRepository;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeaders;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,13 +24,21 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class DeviceService {
-    
-    @Autowired
-    private DeviceRepository deviceRepository;
-    
-    @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
-    
+
+    private final DeviceRepository deviceRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final MqttBrokerService mqttBrokerService;
+
+    public DeviceService(
+            DeviceRepository deviceRepository,
+            KafkaTemplate<String, Object> kafkaTemplate,
+            MqttBrokerService mqttBrokerService
+    ) {
+        this.deviceRepository = deviceRepository;
+        this.kafkaTemplate = kafkaTemplate;
+        this.mqttBrokerService = mqttBrokerService;
+    }
+
     public DeviceDto createDevice(DeviceDto deviceDto) {
         Device device = new Device();
         device.setName(deviceDto.getName());
@@ -38,13 +47,12 @@ public class DeviceService {
         device.setStatus(deviceDto.getStatus());
         device.setFactoryId(deviceDto.getFactoryId());
         device.setLocation(deviceDto.getLocation());
+        device.updateFromDto(deviceDto);
         device.setLastSeen(LocalDateTime.now());
-        
+        device.setMqttBroker(resolveBroker(deviceDto.getMqttBrokerId()));
+
         Device savedDevice = deviceRepository.save(device);
-        
-        // Publish device metadata update
         publishDeviceMetadataUpdate(savedDevice);
-        
         return savedDevice.toDto();
     }
     
@@ -58,8 +66,11 @@ public class DeviceService {
                 .map(Device::toDto);
     }
     
-    public List<DeviceDto> getAllDevices() {
-        return deviceRepository.findAll().stream()
+    public List<DeviceDto> getAllDevices(String mqttBrokerId) {
+        List<Device> devices = mqttBrokerId == null || mqttBrokerId.isBlank()
+                ? deviceRepository.findAll()
+                : deviceRepository.findByMqttBroker_Id(mqttBrokerId);
+        return devices.stream()
                 .map(Device::toDto)
                 .collect(Collectors.toList());
     }
@@ -78,27 +89,23 @@ public class DeviceService {
     
     public DeviceDto updateDevice(String id, DeviceDto deviceDto) {
         Device device = deviceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Device not found with id: " + id));
-        
+                .orElseThrow(() -> new NotFoundException("Device not found with id: " + id));
+
         device.updateFromDto(deviceDto);
+        device.setMqttBroker(resolveBroker(deviceDto.getMqttBrokerId()));
         Device updatedDevice = deviceRepository.save(device);
-        
-        // Publish device metadata update
         publishDeviceMetadataUpdate(updatedDevice);
-        
         return updatedDevice.toDto();
     }
     
     public void updateDeviceStatus(String id, DeviceDto.DeviceStatus status) {
         Device device = deviceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Device not found with id: " + id));
-        
+                .orElseThrow(() -> new NotFoundException("Device not found with id: " + id));
+
         DeviceDto.DeviceStatus oldStatus = device.getStatus();
         device.setStatus(status);
         device.setLastSeen(LocalDateTime.now());
         deviceRepository.save(device);
-        
-        // Publish status change if status actually changed
         if (!oldStatus.equals(status)) {
             publishDeviceStatusChange(device, oldStatus, status);
         }
@@ -106,19 +113,17 @@ public class DeviceService {
     
     public void updateLastSeen(String id) {
         Device device = deviceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Device not found with id: " + id));
-        
+                .orElseThrow(() -> new NotFoundException("Device not found with id: " + id));
+
         device.setLastSeen(LocalDateTime.now());
         deviceRepository.save(device);
     }
     
     public void deleteDevice(String id) {
         Device device = deviceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Device not found with id: " + id));
-        
+                .orElseThrow(() -> new NotFoundException("Device not found with id: " + id));
+
         deviceRepository.delete(device);
-        
-        // Publish device deletion
         publishDeviceDeletion(device);
     }
     
@@ -135,6 +140,10 @@ public class DeviceService {
     
     public long getDeviceCountByStatus(DeviceDto.DeviceStatus status) {
         return deviceRepository.countByStatus(status);
+    }
+
+    public List<DeviceDto> getDevicesByBroker(String brokerId) {
+        return deviceRepository.findByMqttBroker_Id(brokerId).stream().map(Device::toDto).toList();
     }
     
     private void publishDeviceMetadataUpdate(Device device) {
@@ -180,6 +189,10 @@ public class DeviceService {
                 LocalDateTime.now()
         );
         kafkaTemplate.send(KafkaTopics.DEVICE_METADATA_UPDATES, device.getId(), event);
+    }
+
+    private MqttBroker resolveBroker(String brokerId) {
+        return mqttBrokerService.getRequiredEnabledBroker(brokerId);
     }
     
     public static class DeviceDeletionEvent {

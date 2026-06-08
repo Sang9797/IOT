@@ -75,6 +75,15 @@ export const deviceAPI = {
     api.get('/devices/offline', { params: { minutesThreshold } }),
 };
 
+export const mqttBrokerAPI = {
+  getBrokers: () => api.get('/mqtt-brokers'),
+  getBroker: (id) => api.get(`/mqtt-brokers/${id}`),
+  createBroker: (brokerData) => api.post('/mqtt-brokers', brokerData),
+  updateBroker: (id, brokerData) => api.put(`/mqtt-brokers/${id}`, brokerData),
+  deleteBroker: (id) => api.delete(`/mqtt-brokers/${id}`),
+  getBrokerDevices: (id) => api.get(`/mqtt-brokers/${id}/devices`),
+};
+
 // Device Control API
 export const controlAPI = {
   // Send command to specific device

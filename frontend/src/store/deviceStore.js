@@ -13,6 +13,7 @@ const useDeviceStore = create((set, get) => ({
     factoryId: '',
     status: '',
     type: '',
+    mqttBrokerId: '',
     search: '',
   },
   pagination: {
@@ -272,6 +273,7 @@ const useDeviceStore = create((set, get) => ({
         factoryId: '',
         status: '',
         type: '',
+        mqttBrokerId: '',
         search: '',
       },
     });
@@ -343,6 +345,10 @@ const useDeviceStore = create((set, get) => ({
     if (filters.type) {
       filtered = filtered.filter(device => device.type === filters.type);
     }
+
+    if (filters.mqttBrokerId) {
+      filtered = filtered.filter(device => device.mqttBrokerId === filters.mqttBrokerId);
+    }
     
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
@@ -366,11 +372,12 @@ const useDeviceStore = create((set, get) => ({
     isLoading: false,
     error: null,
     filters: {
-      factoryId: '',
-      status: '',
-      type: '',
-      search: '',
-    },
+        factoryId: '',
+        status: '',
+        type: '',
+        mqttBrokerId: '',
+        search: '',
+      },
     pagination: {
       page: 1,
       limit: 10,

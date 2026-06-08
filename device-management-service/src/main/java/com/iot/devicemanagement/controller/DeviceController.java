@@ -21,12 +21,8 @@ public class DeviceController {
     
     @PostMapping
     public ResponseEntity<DeviceDto> createDevice(@Valid @RequestBody DeviceDto deviceDto) {
-        try {
-            DeviceDto createdDevice = deviceService.createDevice(deviceDto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdDevice);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        DeviceDto createdDevice = deviceService.createDevice(deviceDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdDevice);
     }
     
     @GetMapping("/{id}")
@@ -44,8 +40,8 @@ public class DeviceController {
     }
     
     @GetMapping
-    public ResponseEntity<List<DeviceDto>> getAllDevices() {
-        List<DeviceDto> devices = deviceService.getAllDevices();
+    public ResponseEntity<List<DeviceDto>> getAllDevices(@RequestParam(required = false) String mqttBrokerId) {
+        List<DeviceDto> devices = deviceService.getAllDevices(mqttBrokerId);
         return ResponseEntity.ok(devices);
     }
     
@@ -64,43 +60,27 @@ public class DeviceController {
     @PutMapping("/{id}")
     public ResponseEntity<DeviceDto> updateDevice(@PathVariable String id, 
                                                  @Valid @RequestBody DeviceDto deviceDto) {
-        try {
-            DeviceDto updatedDevice = deviceService.updateDevice(id, deviceDto);
-            return ResponseEntity.ok(updatedDevice);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        DeviceDto updatedDevice = deviceService.updateDevice(id, deviceDto);
+        return ResponseEntity.ok(updatedDevice);
     }
     
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updateDeviceStatus(@PathVariable String id, 
                                                   @RequestParam DeviceDto.DeviceStatus status) {
-        try {
-            deviceService.updateDeviceStatus(id, status);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        deviceService.updateDeviceStatus(id, status);
+        return ResponseEntity.ok().build();
     }
     
     @PatchMapping("/{id}/last-seen")
     public ResponseEntity<Void> updateLastSeen(@PathVariable String id) {
-        try {
-            deviceService.updateLastSeen(id);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        deviceService.updateLastSeen(id);
+        return ResponseEntity.ok().build();
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable String id) {
-        try {
-            deviceService.deleteDevice(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        deviceService.deleteDevice(id);
+        return ResponseEntity.noContent().build();
     }
     
     @GetMapping("/offline")
@@ -118,7 +98,7 @@ public class DeviceController {
             stats.setOnlineDevices(deviceService.getDeviceCountByStatus(DeviceDto.DeviceStatus.ONLINE));
             stats.setOfflineDevices(deviceService.getDeviceCountByStatus(DeviceDto.DeviceStatus.OFFLINE));
         } else {
-            stats.setTotalDevices(deviceService.getAllDevices().size());
+            stats.setTotalDevices(deviceService.getAllDevices(null).size());
             stats.setOnlineDevices(deviceService.getDeviceCountByStatus(DeviceDto.DeviceStatus.ONLINE));
             stats.setOfflineDevices(deviceService.getDeviceCountByStatus(DeviceDto.DeviceStatus.OFFLINE));
         }

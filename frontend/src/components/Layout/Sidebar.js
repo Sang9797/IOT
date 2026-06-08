@@ -8,8 +8,8 @@ import {
   Users, 
   BarChart3, 
   Activity,
+  Radio,
   LogOut,
-  Menu,
   X
 } from 'lucide-react';
 import  useAuthStore from '../../store/authStore';
@@ -36,6 +36,12 @@ const Sidebar = ({ isOpen, onToggle }) => {
       href: '/control',
       icon: Settings,
       current: location.pathname.startsWith('/control'),
+    },
+    {
+      name: 'MQTT Brokers',
+      href: '/mqtt-brokers',
+      icon: Radio,
+      current: location.pathname.startsWith('/mqtt-brokers'),
     },
     {
       name: 'Alerts',

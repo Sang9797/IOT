@@ -16,6 +16,8 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
     Optional<Device> findByAddress(String address);
     
     List<Device> findByFactoryId(String factoryId);
+
+    List<Device> findByMqttBroker_Id(String mqttBrokerId);
     
     List<Device> findByStatus(DeviceDto.DeviceStatus status);
     
@@ -33,4 +35,6 @@ public interface DeviceRepository extends JpaRepository<Device, String> {
     
     @Query("SELECT COUNT(d) FROM Device d WHERE d.status = :status")
     long countByStatus(@Param("status") DeviceDto.DeviceStatus status);
+
+    long countByMqttBroker_Id(String mqttBrokerId);
 }

@@ -28,6 +28,9 @@ public class DeviceDto {
     
     private String factoryId;
     private String location;
+    private String mqttBrokerId;
+    private String mqttBrokerName;
+    private String mqttBrokerDisplayUrl;
     private Map<String, Object> configuration;
     
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -105,6 +108,30 @@ public class DeviceDto {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getMqttBrokerId() {
+        return mqttBrokerId;
+    }
+
+    public void setMqttBrokerId(String mqttBrokerId) {
+        this.mqttBrokerId = mqttBrokerId;
+    }
+
+    public String getMqttBrokerName() {
+        return mqttBrokerName;
+    }
+
+    public void setMqttBrokerName(String mqttBrokerName) {
+        this.mqttBrokerName = mqttBrokerName;
+    }
+
+    public String getMqttBrokerDisplayUrl() {
+        return mqttBrokerDisplayUrl;
+    }
+
+    public void setMqttBrokerDisplayUrl(String mqttBrokerDisplayUrl) {
+        this.mqttBrokerDisplayUrl = mqttBrokerDisplayUrl;
     }
 
     public Map<String, Object> getConfiguration() {

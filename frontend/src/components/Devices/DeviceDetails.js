@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Edit, Power, PowerOff, MapPin, Calendar, Cpu, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
+import { X, MapPin, Calendar, Cpu, Wifi, WifiOff, AlertTriangle } from 'lucide-react';
 
 const DeviceDetails = ({ isOpen, onClose, device }) => {
   if (!isOpen || !device) return null;
@@ -95,29 +95,24 @@ const DeviceDetails = ({ isOpen, onClose, device }) => {
                     <label className="text-sm font-medium text-gray-500">Factory ID</label>
                     <p className="text-sm text-gray-900">{device.factoryId || 'N/A'}</p>
                   </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">MQTT Broker</label>
+                    <p className="text-sm text-gray-900">{device.mqttBrokerName || 'Unassigned'}</p>
+                    {device.mqttBrokerDisplayUrl && (
+                      <p className="text-xs text-gray-500">{device.mqttBrokerDisplayUrl}</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Location Information */}
               <div>
                 <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center">
                   <MapPin className="h-4 w-4 mr-2" />
                   Location Information
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Location</label>
-                    <p className="text-sm text-gray-900">{device.location || 'Not specified'}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Coordinates</label>
-                    <p className="text-sm text-gray-900">
-                      {device.latitude && device.longitude 
-                        ? `${device.latitude}, ${device.longitude}`
-                        : 'Not available'
-                      }
-                    </p>
-                  </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Location</label>
+                  <p className="text-sm text-gray-900">{device.location || 'Not specified'}</p>
                 </div>
               </div>
 
@@ -146,12 +141,6 @@ const DeviceDetails = ({ isOpen, onClose, device }) => {
                       {device.lastSeen ? new Date(device.lastSeen).toLocaleString() : 'Never'}
                     </p>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-500">Last Data</label>
-                    <p className="text-sm text-gray-900">
-                      {device.lastDataReceived ? new Date(device.lastDataReceived).toLocaleString() : 'Never'}
-                    </p>
-                  </div>
                 </div>
               </div>
 
@@ -177,27 +166,17 @@ const DeviceDetails = ({ isOpen, onClose, device }) => {
                 </div>
               </div>
 
-              {/* Description */}
-              {device.description && (
+              {device.configuration && Object.keys(device.configuration).length > 0 && (
                 <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-3">Description</h4>
-                  <p className="text-sm text-gray-700">{device.description}</p>
-                </div>
-              )}
-
-              {/* Metadata */}
-              {device.metadata && Object.keys(device.metadata).length > 0 && (
-                <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-3">Metadata</h4>
+                  <h4 className="text-md font-medium text-gray-900 mb-3">Configuration</h4>
                   <div className="bg-gray-50 rounded-md p-3">
                     <pre className="text-xs text-gray-700 overflow-x-auto">
-                      {JSON.stringify(device.metadata, null, 2)}
+                      {JSON.stringify(device.configuration, null, 2)}
                     </pre>
                   </div>
                 </div>
               )}
 
-              {/* Error Information */}
               {device.status === 'ERROR' && device.errorMessage && (
                 <div>
                   <h4 className="text-md font-medium text-gray-900 mb-3 flex items-center text-red-600">

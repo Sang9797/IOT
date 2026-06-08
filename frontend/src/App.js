@@ -16,6 +16,7 @@ import ControlCommands from './pages/Control/ControlCommands';
 import AlertsDashboard from './pages/Alerts/AlertsDashboard';
 import Analytics from './pages/Analytics/Analytics';
 import UserManagement from './pages/Users/UserManagement';
+import MqttBrokerManagement from './pages/Brokers/MqttBrokerManagement';
 
 // Loading Component
 const LoadingSpinner = () => (
@@ -156,6 +157,17 @@ function App() {
               <ProtectedRoute>
                 <AppLayout>
                   <ControlCommands />
+                </AppLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/mqtt-brokers"
+            element={
+              <ProtectedRoute>
+                <AppLayout>
+                  <MqttBrokerManagement />
                 </AppLayout>
               </ProtectedRoute>
             }

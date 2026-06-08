@@ -1,12 +1,8 @@
 package com.iot.deviceprocessor.config;
 
-import org.eclipse.paho.client.mqttv3.MqttClient;
+import com.iot.common.dto.MqttBrokerDto;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 
@@ -19,11 +15,6 @@ import java.security.KeyStore;
 
 @Configuration
 public class MqttConfig {
-
-    private static final Logger log = LoggerFactory.getLogger(MqttConfig.class);
-
-    @Value("${mqtt.broker.url:ssl://localhost:8883}")
-    private String mqttBrokerUrl;
 
     @Value("${mqtt.client.id:device-processor}")
     private String mqttClientId;
@@ -58,129 +49,66 @@ public class MqttConfig {
     @Value("${mqtt.ssl.protocol:TLSv1.2}")
     private String sslProtocol;
 
-    @Bean
-    public MqttClient mqttClient() throws MqttException {
-        log.info("Creating MQTT client...");
-        log.info("Broker URL: {}", mqttBrokerUrl);
-        log.info("Client ID: {}", mqttClientId);
-        log.info("SSL Enabled: {}", sslEnabled);
-
-        MqttClient client = new MqttClient(mqttBrokerUrl, mqttClientId);
-        return client;
+    public String composeBrokerUrl(MqttBrokerDto broker) {
+        return broker.getProtocol() + "://" + broker.getHost() + ":" + broker.getPort();
     }
 
-    @Bean
-    public MqttConnectOptions mqttConnectOptions() {
-        log.info("Configuring MQTT connection options...");
+    public String composeClientId(String brokerId) {
+        return mqttClientId + "-" + brokerId;
+    }
 
+    public MqttConnectOptions createConnectOptions(MqttBrokerDto broker) {
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(true);
         options.setConnectionTimeout(30);
         options.setKeepAliveInterval(60);
         options.setAutomaticReconnect(true);
 
-        // Set username and password if provided
-        if (mqttUsername != null && !mqttUsername.isEmpty()) {
-            log.info("Setting MQTT username: {}", mqttUsername);
-            options.setUserName(mqttUsername);
+        String username = broker.getUsername() != null && !broker.getUsername().isBlank() ? broker.getUsername() : mqttUsername;
+        String password = broker.getPassword() != null && !broker.getPassword().isBlank() ? broker.getPassword() : mqttPassword;
+        if (username != null && !username.isBlank()) {
+            options.setUserName(username);
+        }
+        if (password != null && !password.isBlank()) {
+            options.setPassword(password.toCharArray());
         }
 
-        if (mqttPassword != null && !mqttPassword.isEmpty()) {
-            log.info("Setting MQTT password: [PROTECTED]");
-            options.setPassword(mqttPassword.toCharArray());
-        }
-
-        // Configure SSL/TLS if enabled
-        if (sslEnabled) {
+        boolean brokerUsesSsl = "ssl".equalsIgnoreCase(broker.getProtocol()) || "tls".equalsIgnoreCase(broker.getProtocol());
+        if (sslEnabled && brokerUsesSsl) {
             try {
-                log.info("Configuring SSL/TLS...");
-                log.info("Protocol: {}", sslProtocol);
-                log.info("Truststore: {}", truststorePath.getDescription());
-                log.info("Keystore: {}", keystorePath.getDescription());
-
-                SSLSocketFactory socketFactory = createSSLSocketFactory();
-                options.setSocketFactory(socketFactory);
-
-                log.info("✅ SSL/TLS configured successfully");
-            } catch (Exception e) {
-                log.error("❌ Failed to configure SSL/TLS", e);
-                throw new RuntimeException("Failed to configure SSL/TLS for MQTT", e);
+                options.setSocketFactory(createSslSocketFactory());
+            } catch (Exception exception) {
+                throw new IllegalStateException("Failed to configure SSL/TLS for MQTT broker " + broker.getId(), exception);
             }
-        } else {
-            log.warn("⚠️  SSL/TLS is disabled - connection will not be encrypted");
         }
 
         return options;
     }
 
-    private SSLSocketFactory createSSLSocketFactory() throws Exception {
-        log.debug("Creating SSL socket factory...");
-
-        // Step 1: Load and initialize TrustStore (contains CA certificates)
-        log.debug("Loading truststore...");
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(
-                TrustManagerFactory.getDefaultAlgorithm()
-        );
+    private SSLSocketFactory createSslSocketFactory() throws Exception {
+        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         KeyStore trustStore = KeyStore.getInstance(truststoreType);
-
         try (InputStream tsInput = truststorePath.getInputStream()) {
             trustStore.load(tsInput, truststorePassword.toCharArray());
-            int certCount = trustStore.size();
-            log.debug("Truststore loaded successfully with {} certificate(s)", certCount);
-
-            // Log certificate aliases for debugging
-            if (log.isDebugEnabled()) {
-                trustStore.aliases().asIterator().forEachRemaining(alias ->
-                        log.debug("  - Truststore contains: {}", alias)
-                );
-            }
-        } catch (Exception e) {
-            log.error("Failed to load truststore from: {}", truststorePath.getDescription(), e);
-            throw new RuntimeException("Failed to load truststore", e);
         }
+        trustManagerFactory.init(trustStore);
 
-        tmf.init(trustStore);
-        log.debug("TrustManager initialized successfully");
-
-        // Step 2: Load and initialize KeyStore (contains client certificate and private key)
-        KeyManagerFactory kmf = null;
+        KeyManagerFactory keyManagerFactory = null;
         if (keystorePath != null && keystorePath.exists()) {
-            log.debug("Loading keystore...");
-            kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             KeyStore keyStore = KeyStore.getInstance(keystoreType);
-
             try (InputStream ksInput = keystorePath.getInputStream()) {
                 keyStore.load(ksInput, keystorePassword.toCharArray());
-                int keyCount = keyStore.size();
-                log.debug("Keystore loaded successfully with {} key(s)", keyCount);
-
-                // Log key aliases for debugging
-                if (log.isDebugEnabled()) {
-                    keyStore.aliases().asIterator().forEachRemaining(alias ->
-                            log.debug("  - Keystore contains: {}", alias)
-                    );
-                }
-            } catch (Exception e) {
-                log.error("Failed to load keystore from: {}", keystorePath.getDescription(), e);
-                throw new RuntimeException("Failed to load keystore", e);
             }
-
-            kmf.init(keyStore, keystorePassword.toCharArray());
-            log.debug("KeyManager initialized successfully");
-        } else {
-            log.warn("Keystore not found or not configured - client certificate authentication will not be used");
+            keyManagerFactory.init(keyStore, keystorePassword.toCharArray());
         }
 
-        // Step 3: Create and initialize SSLContext
-        log.debug("Initializing SSLContext with protocol: {}", sslProtocol);
         SSLContext sslContext = SSLContext.getInstance(sslProtocol);
         sslContext.init(
-                kmf != null ? kmf.getKeyManagers() : null,
-                tmf.getTrustManagers(),
+                keyManagerFactory != null ? keyManagerFactory.getKeyManagers() : null,
+                trustManagerFactory.getTrustManagers(),
                 null
         );
-
-        log.debug("SSLContext initialized successfully");
         return sslContext.getSocketFactory();
     }
 }

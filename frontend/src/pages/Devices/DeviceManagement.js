@@ -15,13 +15,12 @@ import {
 import useDeviceStore from '../../store/deviceStore';
 import DeviceForm from '../../components/Devices/DeviceForm';
 import DeviceDetails from '../../components/Devices/DeviceDetails';
+import { mqttBrokerAPI } from '../../services/api';
 
 const DeviceManagement = () => {
   const {
     devices,
-    selectedDevice,
     isLoading,
-    error,
     filters,
     pagination,
     fetchDevices,
@@ -41,9 +40,11 @@ const DeviceManagement = () => {
   const [editingDevice, setEditingDevice] = useState(null);
   const [selectedDevices, setSelectedDevices] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [brokers, setBrokers] = useState([]);
 
   useEffect(() => {
     fetchDevices();
+    mqttBrokerAPI.getBrokers().then((response) => setBrokers(response.data)).catch(() => setBrokers([]));
   }, [fetchDevices]);
 
   const handleCreateDevice = async (deviceData) => {
@@ -227,7 +228,7 @@ const DeviceManagement = () => {
         {/* Advanced Filters */}
         {showFilters && (
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="label">Factory</label>
                 <select
@@ -267,6 +268,21 @@ const DeviceManagement = () => {
                   <option value="ACTUATOR">Actuator</option>
                   <option value="CONTROLLER">Controller</option>
                   <option value="MONITOR">Monitor</option>
+                </select>
+              </div>
+              <div>
+                <label className="label">MQTT Broker</label>
+                <select
+                  value={filters.mqttBrokerId}
+                  onChange={(e) => setFilters({ mqttBrokerId: e.target.value })}
+                  className="input"
+                >
+                  <option value="">All Brokers</option>
+                  {brokers.map((broker) => (
+                    <option key={broker.id} value={broker.id}>
+                      {broker.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -335,6 +351,9 @@ const DeviceManagement = () => {
                   Factory
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Broker
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Last Seen
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -345,7 +364,7 @@ const DeviceManagement = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center">
+                  <td colSpan="8" className="px-6 py-12 text-center">
                     <div className="flex items-center justify-center">
                       <div className="loading-dots">
                         <div></div>
@@ -358,7 +377,7 @@ const DeviceManagement = () => {
                 </tr>
               ) : filteredDevices.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
                     No devices found
                   </td>
                 </tr>
@@ -398,6 +417,10 @@ const DeviceManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {device.factoryId || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{device.mqttBrokerName || 'N/A'}</div>
+                      <div className="text-xs text-gray-500">{device.mqttBrokerDisplayUrl || ''}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {device.lastSeen ? new Date(device.lastSeen).toLocaleString() : 'Never'}
@@ -475,6 +498,7 @@ const DeviceManagement = () => {
           onClose={() => setShowCreateForm(false)}
           onSubmit={handleCreateDevice}
           title="Create New Device"
+          brokers={brokers}
         />
       )}
 
@@ -488,6 +512,7 @@ const DeviceManagement = () => {
           onSubmit={handleUpdateDevice}
           device={editingDevice}
           title="Edit Device"
+          brokers={brokers}
         />
       )}
 

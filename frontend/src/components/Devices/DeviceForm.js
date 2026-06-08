@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { X, Save, AlertCircle } from 'lucide-react';
 
-const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
+const DeviceForm = ({ isOpen, onClose, onSubmit, device, title, brokers = [] }) => {
   const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
     defaultValues: {
       name: '',
@@ -10,9 +10,9 @@ const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
       address: '',
       location: '',
       factoryId: '',
+      mqttBrokerId: '',
       status: 'ONLINE',
-      description: '',
-      metadata: {}
+      configuration: '{}'
     }
   });
 
@@ -24,17 +24,24 @@ const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
       setValue('address', device.address || '');
       setValue('location', device.location || '');
       setValue('factoryId', device.factoryId || '');
+      setValue('mqttBrokerId', device.mqttBrokerId || '');
       setValue('status', device.status || 'ONLINE');
-      setValue('description', device.description || '');
-      setValue('metadata', device.metadata || {});
+      setValue('configuration', JSON.stringify(device.configuration || {}, null, 2));
     } else {
-      // Reset form for new device
       reset();
     }
   }, [device, setValue, reset]);
 
   const handleFormSubmit = (data) => {
-    onSubmit(data);
+    let parsedConfiguration = {};
+    if (data.configuration?.trim()) {
+      try {
+        parsedConfiguration = JSON.parse(data.configuration);
+      } catch (error) {
+        return;
+      }
+    }
+    onSubmit({ ...data, configuration: parsedConfiguration });
   };
 
   const handleClose = () => {
@@ -70,8 +77,9 @@ const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
             <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
               {/* Device Name */}
               <div>
-                <label className="label">Device Name *</label>
+                <label htmlFor="device-name" className="label">Device Name *</label>
                 <input
+                  id="device-name"
                   {...register('name', { required: 'Device name is required' })}
                   type="text"
                   className={`input ${errors.name ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
@@ -87,8 +95,9 @@ const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
 
               {/* Device Type */}
               <div>
-                <label className="label">Device Type *</label>
+                <label htmlFor="device-type" className="label">Device Type *</label>
                 <select
+                  id="device-type"
                   {...register('type', { required: 'Device type is required' })}
                   className={`input ${errors.type ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                 >
@@ -107,8 +116,9 @@ const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
 
               {/* Device Address */}
               <div>
-                <label className="label">Device Address *</label>
+                <label htmlFor="device-address" className="label">Device Address *</label>
                 <input
+                  id="device-address"
                   {...register('address', { required: 'Device address is required' })}
                   type="text"
                   className={`input ${errors.address ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
@@ -124,8 +134,9 @@ const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
 
               {/* Location */}
               <div>
-                <label className="label">Location</label>
+                <label htmlFor="device-location" className="label">Location</label>
                 <input
+                  id="device-location"
                   {...register('location')}
                   type="text"
                   className="input"
@@ -135,8 +146,9 @@ const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
 
               {/* Factory ID */}
               <div>
-                <label className="label">Factory ID</label>
+                <label htmlFor="device-factory" className="label">Factory ID</label>
                 <select
+                  id="device-factory"
                   {...register('factoryId')}
                   className="input"
                 >
@@ -147,10 +159,33 @@ const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
                 </select>
               </div>
 
+              <div>
+                <label htmlFor="device-broker" className="label">MQTT Broker *</label>
+                <select
+                  id="device-broker"
+                  {...register('mqttBrokerId', { required: 'MQTT broker is required' })}
+                  className={`input ${errors.mqttBrokerId ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                >
+                  <option value="">Select broker</option>
+                  {brokers.map((broker) => (
+                    <option key={broker.id} value={broker.id}>
+                      {broker.name} ({broker.displayUrl || `${broker.protocol}://${broker.host}:${broker.port}`})
+                    </option>
+                  ))}
+                </select>
+                {errors.mqttBrokerId && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    {errors.mqttBrokerId.message}
+                  </p>
+                )}
+              </div>
+
               {/* Status */}
               <div>
-                <label className="label">Status</label>
+                <label htmlFor="device-status" className="label">Status</label>
                 <select
+                  id="device-status"
                   {...register('status')}
                   className="input"
                 >
@@ -161,28 +196,18 @@ const DeviceForm = ({ isOpen, onClose, onSubmit, device, title }) => {
                 </select>
               </div>
 
-              {/* Description */}
-              <div>
-                <label className="label">Description</label>
-                <textarea
-                  {...register('description')}
-                  rows={3}
-                  className="input"
-                  placeholder="Device description..."
-                />
-              </div>
-
               {/* Metadata */}
               <div>
-                <label className="label">Metadata (JSON)</label>
+                <label htmlFor="device-metadata" className="label">Configuration (JSON)</label>
                 <textarea
-                  {...register('metadata')}
+                  id="device-metadata"
+                  {...register('configuration')}
                   rows={3}
                   className="input font-mono text-sm"
                   placeholder='{"model": "Sensor-X1", "version": "1.0", "manufacturer": "IoT Corp"}'
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Enter metadata as valid JSON format
+                  Enter configuration as valid JSON format
                 </p>
               </div>
             </form>
