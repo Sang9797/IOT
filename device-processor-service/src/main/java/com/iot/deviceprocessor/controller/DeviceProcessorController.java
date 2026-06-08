@@ -3,7 +3,6 @@ package com.iot.deviceprocessor.controller;
 import com.iot.common.dto.ControlCommandDto;
 import com.iot.deviceprocessor.service.MqttService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,10 +12,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/processor")
 @CrossOrigin(origins = "*")
-@RequiredArgsConstructor
 public class DeviceProcessorController {
 
     private final MqttService mqttService;
+
+    public DeviceProcessorController(MqttService mqttService) {
+        this.mqttService = mqttService;
+    }
 
     @PostMapping("/devices/{deviceId}/control")
     public ResponseEntity<Map<String, String>> sendControlCommand(

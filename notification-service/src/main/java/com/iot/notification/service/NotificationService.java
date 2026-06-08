@@ -2,6 +2,7 @@ package com.iot.notification.service;
 
 import com.iot.common.config.KafkaTopics;
 import com.iot.common.dto.AlertDto;
+import com.iot.common.dto.DeviceStatusEventDto;
 import com.iot.common.dto.NotificationDto;
 import com.iot.notification.handler.NotificationWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,12 +53,12 @@ public class NotificationService {
     }
     
     @KafkaListener(topics = KafkaTopics.DEVICE_STATUS_CHANGES, groupId = "notification-group")
-    public void processDeviceStatusChange(Map<String, Object> statusChange) {
+    public void processDeviceStatusChange(DeviceStatusEventDto statusChange) {
         try {
             System.out.println("Processing device status change: " + statusChange);
             
-            String deviceId = (String) statusChange.get("deviceId");
-            String newStatus = (String) statusChange.get("newStatus");
+            String deviceId = statusChange.getDeviceId();
+            String newStatus = statusChange.getCurrentStatus().name();
             
             // Broadcast status change to WebSocket clients
             webSocketHandler.broadcastDeviceStatusUpdate(deviceId, newStatus);

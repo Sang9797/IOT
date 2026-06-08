@@ -1,13 +1,4 @@
--- Initialize IoT Devices Database
-
--- Create database if not exists
---CREATE DATABASE iot_devices;
-
--- Use the database
-\c iot_devices;
-
--- Create devices table
-CREATE TABLE IF NOT EXISTS devices (
+CREATE TABLE devices (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL UNIQUE,
@@ -20,31 +11,27 @@ CREATE TABLE IF NOT EXISTS devices (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create device configurations table
-CREATE TABLE IF NOT EXISTS device_configurations (
+CREATE TABLE device_configurations (
     device_id VARCHAR(255) NOT NULL,
     config_key VARCHAR(255) NOT NULL,
     config_value TEXT,
     PRIMARY KEY (device_id, config_key),
-    FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
+    CONSTRAINT fk_device_configurations_device
+        FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
 );
 
--- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_devices_factory_id ON devices(factory_id);
-CREATE INDEX IF NOT EXISTS idx_devices_status ON devices(status);
-CREATE INDEX IF NOT EXISTS idx_devices_type ON devices(type);
-CREATE INDEX IF NOT EXISTS idx_devices_last_seen ON devices(last_seen);
+CREATE INDEX idx_devices_factory_id ON devices(factory_id);
+CREATE INDEX idx_devices_status ON devices(status);
+CREATE INDEX idx_devices_type ON devices(type);
+CREATE INDEX idx_devices_last_seen ON devices(last_seen);
 
--- Insert sample data
 INSERT INTO devices (id, name, address, type, status, factory_id, location) VALUES
 ('device-001', 'Temperature Sensor 1', '192.168.1.100', 'SENSOR', 'ONLINE', 'factory-001', 'Production Line A'),
 ('device-002', 'Pressure Sensor 1', '192.168.1.101', 'SENSOR', 'ONLINE', 'factory-001', 'Production Line A'),
 ('device-003', 'Vibration Monitor 1', '192.168.1.102', 'MONITOR', 'ONLINE', 'factory-001', 'Production Line B'),
 ('device-004', 'Control Valve 1', '192.168.1.103', 'ACTUATOR', 'ONLINE', 'factory-001', 'Production Line B'),
-('device-005', 'Temperature Sensor 2', '192.168.1.104', 'SENSOR', 'OFFLINE', 'factory-002', 'Production Line C')
-ON CONFLICT (id) DO NOTHING;
+('device-005', 'Temperature Sensor 2', '192.168.1.104', 'SENSOR', 'OFFLINE', 'factory-002', 'Production Line C');
 
--- Insert sample configurations
 INSERT INTO device_configurations (device_id, config_key, config_value) VALUES
 ('device-001', 'sampling_rate', '5'),
 ('device-001', 'threshold_high', '80'),
@@ -58,5 +45,4 @@ INSERT INTO device_configurations (device_id, config_key, config_value) VALUES
 ('device-004', 'max_pressure', '15'),
 ('device-005', 'sampling_rate', '5'),
 ('device-005', 'threshold_high', '80'),
-('device-005', 'threshold_low', '-10')
-ON CONFLICT (device_id, config_key) DO NOTHING;
+('device-005', 'threshold_low', '-10');

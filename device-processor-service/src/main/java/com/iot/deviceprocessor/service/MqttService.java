@@ -2,21 +2,26 @@ package com.iot.deviceprocessor.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class MqttService implements MqttCallback {
+
+    private static final Logger log = LoggerFactory.getLogger(MqttService.class);
 
     private final MqttClient mqttClient;
 
     private final MqttConnectOptions mqttConnectOptions;
 
     private static final String DEVICE_DATA_TOPIC = "iot/sensors/#";
+
+    public MqttService(MqttClient mqttClient, MqttConnectOptions mqttConnectOptions) {
+        this.mqttClient = mqttClient;
+        this.mqttConnectOptions = mqttConnectOptions;
+    }
 
     @PostConstruct
     public void initialize() {
